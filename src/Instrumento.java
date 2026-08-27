@@ -1,12 +1,11 @@
 public class Instrumento implements Runnable {
     private String nome;
-    private volatile boolean tocando;
     private Thread thread;
     private volatile boolean pausado;
 
     public Instrumento(String nome, boolean tocando) {
         this.nome = nome;
-        this.tocando = tocando;
+        this.pausado = !tocando;
     }
 
     /**
@@ -60,10 +59,6 @@ public class Instrumento implements Runnable {
     }
 
     public boolean isTocando() {
-        return tocando;
-    }
-
-    public void setTocando(boolean tocando) {
-        this.tocando = tocando;
+        return !pausado;
     }
 }
