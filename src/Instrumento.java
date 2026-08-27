@@ -2,6 +2,7 @@ public class Instrumento implements Runnable {
     private String nome;
     private volatile boolean tocando;
     private Thread thread;
+    private volatile boolean pausado;
 
     public Instrumento(String nome, boolean tocando) {
         this.nome = nome;
@@ -17,21 +18,39 @@ public class Instrumento implements Runnable {
             thread.start();
         }
     }
+    public synchronized void pausar() {
+        pausado = true;
+        }
+
+    public synchronized void retomar() {
+        pausado = false;
+        notify();
+        }
 
     @Override
     public void run() {
-        while (true) {
-            System.out.println("🎵 " + nome + " tocando...");
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
+    while (true) {
+        synchronized (this) {
+            while (pausado) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
             }
         }
-    }
 
+        System.out.println("🎵 " + nome + " tocando...");
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return;
+        }
+    }
+}
     public String getNome() {
         return nome;
     }
