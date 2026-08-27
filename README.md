@@ -7,9 +7,9 @@ Nosso desafio aqui foi construir uma aplicação que funciona como uma verdadeir
 Para fazer isso acontecer, colocamos cada "instrumento" rodando na sua própria Thread, de maneira 100% independente. O legal é que o DJ, no caso, você que está rodando o projeto, pode interagir com o sistema direto pelo console. É só enviar os comandos de texto para controlar as faixas individualmente, podendo pausar e retomar uma música específica sem atrapalhar as outras que continuam rolando no fundo.
 
 ## 👥 Membros da Equipe
-- [Andrews Queiroz](https://github.com/4ndrewss)  
-- [Enzo Amorim](https://github.com/ENZOBRS)
+- [Andrews Queiroz](https://github.com/4ndrewss)
 - [Caio Gilles](https://github.com/CaioGilles)
+- [Enzo Amorim](https://github.com/ENZOBRS)
 - [Gustavo Veloso](https://github.com/velosogustavo)
 
 ## 📌 Gestão e Organização
