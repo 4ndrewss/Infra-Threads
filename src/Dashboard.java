@@ -71,7 +71,7 @@ public class Dashboard implements Runnable {
         if (instrumentos.isEmpty()) {
             quadro.append("   Nenhum instrumento na mesa.\n");
         } else {
-            quadro.append(String.format("   %-16s %-12s %s%n", "INSTRUMENTO", "STATUS", "BATIDAS"));
+            quadro.append(String.format("   %-14s %-10s %-8s %s%n", "INSTRUMENTO", "STATUS", "BPM", "BATIDAS"));
             quadro.append("-------------------------------------------------\n");
 
             for (Instrumento instrumento : instrumentos) {
@@ -79,10 +79,11 @@ public class Dashboard implements Runnable {
                 String icone = instrumento.isTocando() ? "🎵" : "⏸";
 
                 quadro.append(String.format(
-                        "%s  %-16s %-12s %d%n",
+                        "%s  %-14s %-10s %-8d %d%n",
                         icone,
                         instrumento.getNome(),
                         status,
+                        instrumento.getBpm(),
                         instrumento.getBatidas()));
             }
         }

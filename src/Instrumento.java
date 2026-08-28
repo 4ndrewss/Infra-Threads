@@ -1,8 +1,15 @@
 public class Instrumento implements Runnable {
+    public static final long INTERVALO_PADRAO_MS = 1000;
+    public static final long INTERVALO_MINIMO_MS = 50;
+    public static final long INTERVALO_MAXIMO_MS = 5000;
+
     private String nome;
     private Thread thread;
     private volatile boolean pausado;
     private volatile long batidas;
+    // volatile porque quem escreve e a thread da Main e quem le e a thread do
+    // instrumento: sem isso ela poderia ficar com o valor velho em cache.
+    private volatile long intervaloMs = INTERVALO_PADRAO_MS;
 
     public Instrumento(String nome, boolean tocando) {
         this.nome = nome;
@@ -62,7 +69,9 @@ public class Instrumento implements Runnable {
             batidas++;
 
             try {
-                Thread.sleep(1000);
+                // Le o intervalo a cada volta, entao um "bpm bateria 500" ja
+                // vale na proxima batida.
+                Thread.sleep(intervaloMs);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return;
@@ -72,6 +81,30 @@ public class Instrumento implements Runnable {
 
     public long getBatidas() {
         return batidas;
+    }
+
+    public long getIntervaloMs() {
+        return intervaloMs;
+    }
+
+    /**
+     * Muda a velocidade do instrumento em tempo de execucao. O valor e o
+     * intervalo entre batidas, em milissegundos: quanto menor, mais rapido.
+     */
+    public void setIntervaloMs(long intervaloMs) {
+        if (intervaloMs < INTERVALO_MINIMO_MS || intervaloMs > INTERVALO_MAXIMO_MS) {
+            throw new IllegalArgumentException(
+                    "Intervalo deve estar entre " + INTERVALO_MINIMO_MS + " e " + INTERVALO_MAXIMO_MS + " ms.");
+        }
+
+        this.intervaloMs = intervaloMs;
+    }
+
+    /**
+     * Batidas por minuto correspondentes ao intervalo atual, so para exibir.
+     */
+    public long getBpm() {
+        return 60000 / intervaloMs;
     }
 
     public String getNome() {

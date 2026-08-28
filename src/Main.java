@@ -32,13 +32,24 @@ public class Main {
             System.out.println("3 - Listar instrumentos");
             System.out.println("4 - Dashboard ao vivo");
             System.out.println("0 - Sair");
+            System.out.println("---------------------------------");
+            System.out.println("add <nome>          - entra na mesa tocando");
+            System.out.println("bpm <nome> <ms>     - muda a velocidade");
             System.out.println("=================================");
 
-            String opcao = scanner.nextLine();
+            String opcao = scanner.nextLine().trim();
 
             String instrumental = "";
 
-            if(opcao.equals("1")){
+            // Os comandos de texto convivem com o menu numerico: a primeira
+            // palavra decide se e comando ou opcao.
+            String[] partes = opcao.split("\\s+");
+
+            if(partes[0].equalsIgnoreCase("add")){
+                adicionarInstrumento(mesa, partes);
+            } else if(partes[0].equalsIgnoreCase("bpm")){
+                mudarVelocidade(mesa, partes);
+            } else if(opcao.equals("1")){
                 System.out.println("Qual instrumento voce quer tocar?");
                 instrumental = scanner.nextLine();
 
@@ -89,8 +100,61 @@ public class Main {
                 scanner.close();
                 System.exit(0);
             } else{
-                System.out.println("Opção inválida! Por favor, digite apenas um número entre 0 e 4.");
+                System.out.println("Opção inválida! Digite um número entre 0 e 4, ou 'add' / 'bpm'.");
             }
+        }
+    }
+
+    /**
+     * Comando "add guitarra": cria o instrumento e sobe a thread dele com o
+     * programa ja rodando. A MesaDeSom sincroniza a insercao, entao o Dashboard
+     * pode estar lendo a lista nesse exato momento sem quebrar.
+     */
+    private static void adicionarInstrumento(MesaDeSom mesa, String[] partes) {
+        if (partes.length < 2) {
+            System.out.println("Uso: add <nome do instrumento>");
+            return;
+        }
+
+        String nome = partes[1];
+
+        if (mesa.buscar(nome) != null) {
+            System.out.println("⚠️ '" + nome + "' já está na mesa.");
+            return;
+        }
+
+        Instrumento novo = new Instrumento(nome, true);
+        novo.iniciar();
+        mesa.adicionar(novo);
+
+        System.out.println("➕ " + nome + " entrou na mesa e já está tocando.");
+    }
+
+    /**
+     * Comando "bpm bateria 500": muda o intervalo entre as batidas em
+     * milissegundos, com o instrumento tocando.
+     */
+    private static void mudarVelocidade(MesaDeSom mesa, String[] partes) {
+        if (partes.length < 3) {
+            System.out.println("Uso: bpm <nome do instrumento> <intervalo em ms>");
+            return;
+        }
+
+        Instrumento instrumento = mesa.buscar(partes[1]);
+
+        if (instrumento == null) {
+            System.out.println("❌ Instrumento '" + partes[1] + "' não encontrado na mesa.");
+            return;
+        }
+
+        try {
+            instrumento.setIntervaloMs(Long.parseLong(partes[2]));
+            System.out.println("⏩ " + instrumento.getNome() + " agora bate a cada "
+                    + instrumento.getIntervaloMs() + "ms (" + instrumento.getBpm() + " BPM).");
+        } catch (NumberFormatException e) {
+            System.out.println("❌ '" + partes[2] + "' não é um número.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ " + e.getMessage());
         }
     }
 }
