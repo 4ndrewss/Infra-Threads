@@ -10,8 +10,8 @@ Para fazer isso acontecer, colocamos cada "instrumento" rodando na sua própria 
 - [Andrews Queiroz](https://github.com/4ndrewss)
 - [Caio Gilles](https://github.com/CaioGilles)
 - [Enzo Amorim](https://github.com/ENZOBRS)
-- [Gustavo Veloso](https://github.com/velosogustavo)
 - [Gabriela Bayo](https://github.com/gabibayo) 
+- [Gustavo Veloso](https://github.com/velosogustavo)
 
 ## 📌 Gestão e Organização
 
