@@ -1,6 +1,7 @@
 public class Instrumento implements Runnable {
     private String nome;
     private volatile boolean tocando;
+    private volatile long batidas;
     private Thread thread;
 
     public Instrumento(String nome, boolean tocando) {
@@ -18,10 +19,28 @@ public class Instrumento implements Runnable {
         }
     }
 
+    /**
+     * Encerra a thread do instrumento.
+     */
+    public synchronized void parar() {
+        tocando = false;
+
+        if (thread != null) {
+            thread.interrupt();
+            thread = null;
+        }
+    }
+
+    /**
+     * O instrumento nao imprime nada: quem escreve no console e o Dashboard.
+     * Aqui so contamos as batidas enquanto ele estiver tocando.
+     */
     @Override
     public void run() {
         while (true) {
-            System.out.println("🎵 " + nome + " tocando...");
+            if (tocando) {
+                batidas++;
+            }
 
             try {
                 Thread.sleep(1000);
@@ -30,6 +49,10 @@ public class Instrumento implements Runnable {
                 return;
             }
         }
+    }
+
+    public long getBatidas() {
+        return batidas;
     }
 
     public String getNome() {
