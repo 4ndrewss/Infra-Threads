@@ -11,6 +11,7 @@ Para fazer isso acontecer, colocamos cada "instrumento" rodando na sua própria 
 - [Caio Gilles](https://github.com/CaioGilles)
 - [Enzo Amorim](https://github.com/ENZOBRS)
 - [Gustavo Veloso](https://github.com/velosogustavo)
+- [Gabriela Bayo](https://github.com/gabibayo) 
 
 ## 📌 Gestão e Organização
 
