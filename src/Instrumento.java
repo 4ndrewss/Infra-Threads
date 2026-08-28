@@ -1,12 +1,12 @@
 public class Instrumento implements Runnable {
     private String nome;
-    private volatile boolean tocando;
-    private volatile long batidas;
     private Thread thread;
+    private volatile boolean pausado;
+    private volatile long batidas;
 
     public Instrumento(String nome, boolean tocando) {
         this.nome = nome;
-        this.tocando = tocando;
+        this.pausado = !tocando;
     }
 
     /**
@@ -19,11 +19,21 @@ public class Instrumento implements Runnable {
         }
     }
 
+    public synchronized void pausar() {
+        pausado = true;
+    }
+
+    public synchronized void retomar() {
+        pausado = false;
+        notify();
+    }
+
     /**
-     * Encerra a thread do instrumento.
+     * Encerra a thread do instrumento. O interrupt tira a thread do wait() ou
+     * do sleep(), e o run() sai do laco.
      */
     public synchronized void parar() {
-        tocando = false;
+        pausado = true;
 
         if (thread != null) {
             thread.interrupt();
@@ -38,9 +48,18 @@ public class Instrumento implements Runnable {
     @Override
     public void run() {
         while (true) {
-            if (tocando) {
-                batidas++;
+            synchronized (this) {
+                while (pausado) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                }
             }
+
+            batidas++;
 
             try {
                 Thread.sleep(1000);
@@ -64,10 +83,6 @@ public class Instrumento implements Runnable {
     }
 
     public boolean isTocando() {
-        return tocando;
-    }
-
-    public void setTocando(boolean tocando) {
-        this.tocando = tocando;
+        return !pausado;
     }
 }

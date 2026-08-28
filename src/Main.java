@@ -2,114 +2,95 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    private static final MesaDeSom mesa = new MesaDeSom();
-    private static final Dashboard dashboard = new Dashboard(mesa);
-    private static final Scanner scanner = new Scanner(System.in);
-
     public static void main(String[] args) {
-        boolean rodando = true;
+        // A lista fica na MesaDeSom, que sincroniza o acesso: a Main altera a
+        // lista enquanto a thread do Dashboard le ela para imprimir o status.
+        MesaDeSom mesa = new MesaDeSom();
+        Dashboard dashboard = new Dashboard(mesa);
 
-        while (rodando) {
-            exibirMenu();
+        mesa.adicionar(new Instrumento("Violao", false));
+        mesa.adicionar(new Instrumento("Guitarra", false));
+        mesa.adicionar(new Instrumento("Bateria", false));
+        mesa.adicionar(new Instrumento("Piano", false));
+        mesa.adicionar(new Instrumento("Baixo", false));
+        mesa.adicionar(new Instrumento("Violino", false));
+        mesa.adicionar(new Instrumento("Sino", false));
+        mesa.adicionar(new Instrumento("Harpa", false));
 
-            switch (lerTexto("Opção: ")) {
-                case "1" -> tocarInstrumento();
-                case "2" -> pararInstrumento();
-                case "3" -> listarInstrumentos();
-                case "4" -> abrirDashboard();
-                case "0" -> rodando = false;
-                default -> System.out.println("Opção inválida.");
+        for (Instrumento instrumentoAtual : mesa.listar()) {
+            instrumentoAtual.iniciar();
+        }
+
+        Scanner scanner = new Scanner(System.in);
+
+        while(true){
+            System.out.println("=================================");
+            System.out.println("    Bem-vindo à Mesa de DJ");
+            System.out.println("=================================");
+            System.out.println("1 - Tocar instrumento");
+            System.out.println("2 - Parar instrumento");
+            System.out.println("3 - Listar instrumentos");
+            System.out.println("4 - Dashboard ao vivo");
+            System.out.println("0 - Sair");
+            System.out.println("=================================");
+
+            String opcao = scanner.nextLine();
+
+            String instrumental = "";
+
+            if(opcao.equals("1")){
+                System.out.println("Qual instrumento voce quer tocar?");
+                instrumental = scanner.nextLine();
+
+                Instrumento instrumentoAtual = mesa.buscar(instrumental);
+
+                if (instrumentoAtual == null) {
+                    System.out.println("❌ Instrumento '" + instrumental + "' não encontrado na mesa.");
+                } else if (!instrumentoAtual.isTocando()) {
+                    instrumentoAtual.retomar();
+                    System.out.println("▶ " + instrumentoAtual.getNome() + " retomado com sucesso!");
+                } else {
+                    System.out.println("⚠️ O instrumento '" + instrumentoAtual.getNome() + "' já está tocando!");
+                }
+            } else if(opcao.equals("2")){
+                System.out.println("Qual instrumento voce quer parar?");
+                instrumental = scanner.nextLine();
+
+                Instrumento instrumentoAtual = mesa.buscar(instrumental);
+
+                if (instrumentoAtual == null) {
+                    System.out.println("❌ Instrumento '" + instrumental + "' não encontrado na mesa.");
+                } else if (instrumentoAtual.isTocando()) {
+                    instrumentoAtual.pausar();
+                    System.out.println("⏸ " + instrumentoAtual.getNome() + " silenciado com sucesso.");
+                } else {
+                    System.out.println("⚠️ O instrumento '" + instrumentoAtual.getNome() + "' já está parado!");
+                }
+            } else if(opcao.equals("3")){
+                System.out.println("--- Lista de Instrumentos Disponíveis ---");
+
+                List<Instrumento> listaInstrumentos = mesa.listar();
+
+                for(int i=0;i<listaInstrumentos.size();i++){
+                    Instrumento instrumentoAtual = listaInstrumentos.get(i);
+
+                    System.out.println("- " + instrumentoAtual.getNome());
+                }
+            } else if(opcao.equals("4")){
+                // O dashboard assume o console ate o usuario apertar ENTER.
+                dashboard.iniciar();
+                scanner.nextLine();
+                dashboard.parar();
+            } else if(opcao.equals("0")){
+                System.out.println("Encerrando o sistema do DJ... Até logo!");
+
+                dashboard.parar();
+                mesa.pararTodos();
+                scanner.close();
+                System.exit(0);
+            } else{
+                System.out.println("Opção inválida! Por favor, digite apenas um número entre 0 e 4.");
             }
         }
-
-        mesa.pararTodos();
-        dashboard.parar();
-        scanner.close();
-
-        System.out.println("Mesa de DJ encerrada.");
-    }
-
-    private static void exibirMenu() {
-        System.out.println();
-        System.out.println("=================================");
-        System.out.println("   Bem-vindo à Mesa de DJ");
-        System.out.println("=================================");
-        System.out.println("1 - Tocar instrumento");
-        System.out.println("2 - Parar instrumento");
-        System.out.println("3 - Listar instrumentos");
-        System.out.println("4 - Dashboard ao vivo");
-        System.out.println("0 - Sair");
-        System.out.println("=================================");
-    }
-
-    /**
-     * Se o instrumento ainda nao existe na mesa, cria e sobe a thread dele.
-     * Se ja existe, so volta a tocar.
-     */
-    private static void tocarInstrumento() {
-        String nome = lerTexto("Nome do instrumento: ");
-
-        if (nome.isEmpty()) {
-            System.out.println("Nome não pode ser vazio.");
-            return;
-        }
-
-        Instrumento instrumento = mesa.buscar(nome);
-
-        if (instrumento == null) {
-            instrumento = new Instrumento(nome, true);
-            instrumento.iniciar();
-            mesa.adicionar(instrumento);
-            System.out.println(nome + " entrou na mesa e está tocando.");
-            return;
-        }
-
-        instrumento.setTocando(true);
-        System.out.println(instrumento.getNome() + " voltou a tocar.");
-    }
-
-    private static void pararInstrumento() {
-        String nome = lerTexto("Nome do instrumento: ");
-        Instrumento instrumento = mesa.buscar(nome);
-
-        if (instrumento == null) {
-            System.out.println("Instrumento não encontrado.");
-            return;
-        }
-
-        instrumento.setTocando(false);
-        System.out.println(instrumento.getNome() + " parou.");
-    }
-
-    private static void listarInstrumentos() {
-        List<Instrumento> instrumentos = mesa.listar();
-
-        if (instrumentos.isEmpty()) {
-            System.out.println("Nenhum instrumento na mesa.");
-            return;
-        }
-
-        for (Instrumento instrumento : instrumentos) {
-            System.out.printf(
-                    "- %-16s %-10s %d batidas%n",
-                    instrumento.getNome(),
-                    instrumento.isTocando() ? "TOCANDO" : "PARADO",
-                    instrumento.getBatidas());
-        }
-    }
-
-    /**
-     * Liga a thread de monitoramento e segura aqui ate o usuario apertar ENTER.
-     * Enquanto isso o dashboard e quem escreve no console.
-     */
-    private static void abrirDashboard() {
-        dashboard.iniciar();
-        scanner.nextLine();
-        dashboard.parar();
-    }
-
-    private static String lerTexto(String rotulo) {
-        System.out.print(rotulo);
-        return scanner.hasNextLine() ? scanner.nextLine().trim() : "0";
     }
 }
