@@ -45,9 +45,9 @@ public class Main {
             // palavra decide se e comando ou opcao.
             String[] partes = opcao.split("\\s+");
 
-            if(partes[0].equalsIgnoreCase("add")){
+            if (partes[0].equalsIgnoreCase("add")) {
                 adicionarInstrumento(mesa, partes);
-            } else if(partes[0].equalsIgnoreCase("bpm")){
+            } else if (partes[0].equalsIgnoreCase("bpm")) {
                 mudarVelocidade(mesa, partes);
             } else if(opcao.equals("1")){
                 System.out.println("Qual instrumento voce quer tocar?");
