@@ -27,25 +27,45 @@ java -cp bin Main
 
 ---
 
+## 🎚️ A mesa inicial
+
+Ao subir, a aplicação já monta a mesa com **8 instrumentos** e cria uma thread para cada um:
+
+`Violao` · `Guitarra` · `Bateria` · `Piano` · `Baixo` · `Violino` · `Sino` · `Harpa`
+
+Todos eles começam **parados** (em `wait()`, sem consumir CPU). O show só começa quando o DJ
+manda tocar — use a opção `1` para liberar os instrumentos que quiser ouvir.
+
+---
+
 ## 🎛️ Comandos
 
 O menu aceita tanto as **opções numéricas** quanto **comandos de texto**:
 
 | Comando | O que faz |
 |---|---|
-| `1` | Toca (retoma) um instrumento |
-| `2` | Para (silencia) um instrumento |
+| `1` | Toca (retoma) um instrumento — o programa pergunta o nome em seguida |
+| `2` | Para (silencia) um instrumento — o programa pergunta o nome em seguida |
 | `3` | Lista os instrumentos da mesa |
 | `4` | Abre o dashboard ao vivo (ENTER volta ao menu) |
 | `0` | Encerra o sistema |
 | `add <nome>` | Cria um instrumento novo e já sobe a thread dele tocando |
 | `bpm <nome> <ms>` | Muda o intervalo entre as batidas, em milissegundos (50 a 5000) |
 
+Detalhes úteis:
+
+- Os nomes **não diferenciam maiúsculas de minúsculas**: `bateria`, `Bateria` e `BATERIA` acham o
+  mesmo instrumento.
+- O `add` usa apenas a **primeira palavra** como nome, então prefira nomes sem espaços
+  (`add Pandeiro`, não `add Caixa de Guerra`).
+- Nomes repetidos são recusados: cada instrumento entra uma vez só na mesa.
+
 Exemplos:
 
 ```text
 add Pandeiro      → ➕ Pandeiro entrou na mesa e já está tocando.
 bpm Bateria 500   → ⏩ Bateria agora bate a cada 500ms (120 BPM).
+bpm Bateria 10    → ❌ Intervalo deve estar entre 50 e 5000 ms.
 ```
 
 ---
@@ -53,7 +73,8 @@ bpm Bateria 500   → ⏩ Bateria agora bate a cada 500ms (120 BPM).
 ## 📊 Dashboard ao vivo
 
 A opção `4` liga uma **thread de monitoramento** que redesenha a tela a cada 2 segundos com o
-status de todos os instrumentos:
+status de todos os instrumentos. A tela abaixo é de uma sessão com `Violao` e `Bateria` tocando,
+a `Bateria` acelerada para 500ms e um `Pandeiro` adicionado em tempo de execução:
 
 ```text
 =================================================
@@ -62,13 +83,22 @@ status de todos os instrumentos:
    INSTRUMENTO    STATUS     BPM      BATIDAS
 -------------------------------------------------
 🎵  Violao         TOCANDO    60       42
-⏸  Guitarra       PARADO     60       17
+⏸  Guitarra       PARADO     60       0
 🎵  Bateria        TOCANDO    120      95
+⏸  Piano          PARADO     60       0
+⏸  Baixo          PARADO     60       0
+⏸  Violino        PARADO     60       0
+⏸  Sino           PARADO     60       0
+⏸  Harpa          PARADO     60       0
+🎵  Pandeiro       TOCANDO    60       18
 =================================================
-   Instrumentos: 3   |   atualiza a cada 2s
+   Instrumentos: 9   |   atualiza a cada 2s
 =================================================
 Pressione ENTER para voltar ao menu.
 ```
+
+O contador de **BATIDAS** continua subindo enquanto o dashboard está aberto: é a prova de que as
+threads dos instrumentos seguem rodando em paralelo, independentes da thread que desenha a tela.
 
 ---
 
@@ -97,7 +127,8 @@ threadsIF/
 │   ├── MesaDeSom.java    → lista compartilhada de instrumentos (acesso sincronizado)
 │   ├── Instrumento.java  → a faixa musical: uma thread com play/pause/BPM
 │   └── Dashboard.java    → thread de monitoramento que imprime o status ao vivo
-└── bin/                  → arquivos .class gerados na compilação
+├── docs/                 → imagens usadas na documentação
+└── bin/                  → arquivos .class gerados na compilação (fora do versionamento)
 ```
 
 ---
